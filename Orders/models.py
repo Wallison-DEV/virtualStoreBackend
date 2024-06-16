@@ -10,16 +10,25 @@ class OrderModel(models.Model):
         ('boleto', 'Boleto'),
         ('cartao', 'Cartão'),
     ]
+    STATUS_CHOICES = [
+        ('accepted', 'Accepted'),
+        ('pending', 'Pending'),
+        ('declined', 'Declined'),
+        ('shipped', 'Shipped'),
+        ('delivered', 'Delivered'),
+        ('canceled', 'Canceled'),
+    ]
 
-    products = models.ForeignKey(OrderItem, related_name='items', on_delete=models.DO_NOTHING, verbose_name='Produtos')
+    products = models.ForeignKey('OrderItem', related_name='items', on_delete=models.DO_NOTHING, verbose_name='Produtos')
     buyer = models.ForeignKey(UserModel, related_name='orders_as_buyer', on_delete=models.DO_NOTHING, verbose_name='Comprador')
     seller = models.ForeignKey(UserModel, related_name='orders_as_seller', on_delete=models.DO_NOTHING, verbose_name='Vendedor')
     order_address = models.ForeignKey(AddressModel, on_delete=models.DO_NOTHING, verbose_name='Endereço de entrega')
     payment_method = models.CharField(max_length=10, choices=PAYMENT_METHOD_CHOICES, verbose_name='Método de pagamento')
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, verbose_name='Status do pedido')
     installments = models.IntegerField(verbose_name='Parcelas', default=1)
     card_pay = models.ForeignKey(CardModel, on_delete=models.DO_NOTHING, verbose_name='Cartão de pagamento', null=True, blank=True)
-    pix_code = models.IntegerField(verbose_name='Código pix para pagamento', null=True, blank=True)
-    bar_code = models.IntegerField(verbose_name='Código de barras de boleto para pagamento', null=True, blank=True)
+    pix_code = models.CharField(max_length=255, verbose_name='Código PIX para pagamento', null=True, blank=True)
+    bar_code = models.CharField(max_length=255, verbose_name='Código de barras do boleto para pagamento', null=True, blank=True)
     
     def __str__(self):
         return f'Pedido #{self.id} - {self.buyer}'
