@@ -1,8 +1,8 @@
 from rest_framework import viewsets
 
 from .models import CardModel
-from .serializers import CardModelSerializer
+from .serializers import CardSerializer
 
-class CardModelViewSet(viewsets.ModelViewSet):
+class CardViewSet(viewsets.ModelViewSet):
     queryset = CardModel.objects.all()
-    serializer_class = AddressModelSerializer
+    serializer_class = CardSerializer

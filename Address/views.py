@@ -1,8 +1,8 @@
 # views.py
 from rest_framework import viewsets
 from .models import AddressModel
-from .serializers import AddressModelSerializer
+from .serializers import AddressSerializer
 
-class AddressModelViewSet(viewsets.ModelViewSet):
+class AddressViewSet(viewsets.ModelViewSet):
     queryset = AddressModel.objects.all()
-    serializer_class = AddressModelSerializer
+    serializer_class = AddressSerializer
