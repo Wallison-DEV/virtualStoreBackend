@@ -28,3 +28,14 @@ class ProductModel(models.Model):
         verbose_name = "Produto"
         verbose_name_plural = "Produtos"
         ordering = ['name']
+
+class ProductLineModel(models.Model):
+    product = models.ForeignKey(ProductModel, on_delete=models.DO_NOTHING, verbose_name='Produto')
+    quantity = models.PositiveIntegerField(verbose_name='Quantidade')
+
+    def __str__(self):
+        return f'{self.product} x{self.quantity}'
+
+    class Meta:
+        verbose_name = 'Item'
+        verbose_name_plural = 'Itens'
