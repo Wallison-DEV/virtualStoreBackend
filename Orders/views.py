@@ -3,29 +3,28 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from .models import OrderModel
 from .serializers import OrderSerializer
+from Companies.models import CompanyModel
 
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = OrderModel.objects.all()
     serializer_class = OrderSerializer
+    permission_classes = [IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         buyer = request.user
-        seller_id = request.data.get('seller_id')
+        seller_id = serializer.validated_data.get('seller_id')
         seller = CompanyModel.objects.get(id=seller_id)
 
-        order_data = serializer.validated_data
-        items_data = order_data.pop('items')
+        if buyer != request.user:
+            return Response({'error': 'You are not authorized to create this order for another user'}, status=status.HTTP_403_FORBIDDEN)
 
-        order = OrderModel.objects.create(buyer=buyer, seller=seller, **order_data)
-
-        for item_data in items_data:
-            product_id = item_data['product']
-            quantity = item_data['quantity']
-            product = ProductModel.objects.get(id=product_id)
-            ProductLineModel.objects.create(product=product, quantity=quantity)
+        try:
+            order = serializer.save()
+        except serializers.ValidationError as e:
+            return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
 
         headers = self.get_success_headers(serializer.data)
         return Response(OrderSerializer(order).data, status=status.HTTP_201_CREATED, headers=headers)
@@ -36,5 +35,9 @@ class OrderViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
 
-        serializer.save()
-        return Response(serializer.data)
+        try:
+            updated_instance = serializer.save()
+        except serializers.ValidationError as e:
+            return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(OrderSerializer(updated_instance).data)
