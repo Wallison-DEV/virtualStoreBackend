@@ -8,6 +8,7 @@ from Card.models import CardModel
 from Card.serializers import CardSerializer
 from Orders.models import OrderModel
 from Orders.serializers import OrderSerializer
+from Company.models import CompanyModel
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -33,20 +34,29 @@ class UserSerializer(serializers.ModelSerializer):
         return data
 
 class CustomTokenObtainPairSerializer(serializers.Serializer):
-    username_or_email = serializers.CharField()
+    username_or_email_or_registration = serializers.CharField()
     password = serializers.CharField()
 
     def validate(self, attrs):
-        username_or_email = attrs.get('username_or_email')
+        username_or_email_or_registration = attrs.get('name_email_or_registration')
         password = attrs.get('password')
 
-        user = authenticate(username=username_or_email, password=password)
+        user = authenticate(email=username_or_email_or_registration, password=password)
+        if user is None:
+            user = authenticate(username=username_or_email_or_registration, password=password)
+        if user is None:
+            try:
+                company = CompanyModel.objects.get(registration_number=username_or_email_or_registration)
+                user = authenticate(username=company.username, password=password)
+            except CompanyModel.DoesNotExist:
+                user = None
 
         if user is None:
             raise serializers.ValidationError('No active account found with the given credentials')
 
         refresh = RefreshToken.for_user(user)
         access_token = refresh.access_token
+
         return {
             'refresh': str(refresh),
             'access': str(access_token),
