@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import CompanyModel, Rating
 from Orders.serializers import OrderSerializer 
+from Products.serializers import ProductLineSerializer
 
 class RatingSerializer(serializers.ModelSerializer):
     class Meta:
@@ -11,7 +12,7 @@ class CompanySerializer(serializers.ModelSerializer):
     products = ProductLineSerializer(many=True, read_only=True)
     ratings = RatingSerializer(many=True, read_only=True)
     average_rating = serializers.ReadOnlyField()
-    orders_as_seller = OrderSerializer(many=True, read_only=True, source='orders_as_seller') 
+    orders_as_seller = OrderSerializer(many=True, read_only=True) 
 
     class Meta:
         model = CompanyModel

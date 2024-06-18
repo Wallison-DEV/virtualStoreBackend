@@ -1,6 +1,6 @@
 from django.db import models
 from Address.models import AddressModel
-from Users.models import UserModel 
+from UsersAccounts.models import UserModel 
 from Companies.models import CompanyModel
 from Products.models import ProductModel, ProductLineModel
 from Card.models import CardModel
