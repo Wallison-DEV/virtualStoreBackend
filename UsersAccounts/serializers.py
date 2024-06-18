@@ -8,7 +8,7 @@ from Card.models import CardModel
 from Card.serializers import CardSerializer
 from Orders.models import OrderModel
 from Orders.serializers import OrderSerializer
-from Company.models import CompanyModel
+from Companies.models import CompanyModel
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
