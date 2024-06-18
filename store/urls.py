@@ -6,7 +6,8 @@ from Address.views import AddressViewSet
 from Card.views import CardViewSet
 from Orders.views import OrderViewSet
 from Products.views import CategoryViewSet, ProductViewSet
-from Users.views import UserViewSet
+from UsersAccounts.views import UserViewSet
+from UsersAccounts import urls as UserUrls
 from Companies.views import CompanyViewSet
 
 router = DefaultRouter()
@@ -21,4 +22,5 @@ router.register(r'company', CompanyViewSet)
 urlpatterns = [
     path("admin/", admin.site.urls),
     path('', include(router.urls)),
+    path('', include(UserUrls))
 ]

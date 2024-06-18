@@ -2,7 +2,11 @@ from django.db import models
 from Products.models import ProductLineModel
 from django.core.validators import MaxValueValidator, MinValueValidator
 
-class CompanyModel(models.Model):
+from UsersAccounts.models import UserModel
+
+from django.contrib.auth.models import AbstractUser
+
+class CompanyModel(AbstractUser):
     name = models.CharField(max_length=255, verbose_name="Nome da Empresa")
     email = models.EmailField(max_length=255, verbose_name="Email da Empresa", unique=True)
     phone_number = models.CharField(max_length=15, verbose_name="Número de Telefone", null=True, blank=True)
@@ -27,7 +31,7 @@ class CompanyModel(models.Model):
 
 class Rating(models.Model):
     company = models.ForeignKey(CompanyModel, on_delete=models.CASCADE, related_name='ratings')
-    user = models.ForeignKey('auth.User', on_delete=models.CASCADE)
+    user = models.ForeignKey(UserModel, on_delete=models.CASCADE)
     value = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
 
     class Meta:
