@@ -1,17 +1,10 @@
 from rest_framework import serializers
-from .models import ProductModel, CategoryModel, ProductLineModel
-
-class CategorySerializer (serializers.ModelSerializer):
-    class Meta:
-        model = CategoryModel
-        fields = '__all__'
+from .models import ProductModel
 
 class ProductSerializer(serializers.ModelSerializer):
-    category = CategorySerializer()
-    
     class Meta:
         model = ProductModel
-        fields = ['name', 'description', 'price', 'stock', 'category']
+        fields = ['id', 'name', 'description', 'price', 'current_price', 'discount', 'last_price', 'category']
 
     def validate_category(self, value):
         try:
@@ -28,11 +21,3 @@ class ProductSerializer(serializers.ModelSerializer):
         category = validated_data.pop('category')
         validated_data['category'] = category if isinstance(category, CategoryModel) else category
         return super().create(validated_data)
-
-
-class ProductLineSerializer(serializers.ModelSerializer):
-    product = serializers.PrimaryKeyRelatedField(queryset=ProductModel.objects.all())
-
-    class Meta:
-        model = ProductLineModel
-        fields = ['product', 'quantity']

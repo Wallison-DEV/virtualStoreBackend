@@ -1,9 +1,15 @@
 from rest_framework import serializers
-from .models import OrderModel
-from Products.serializers import ProductLineSerializer
-from Products.models import ProductLineModel, ProductModel
+from .models import OrderModel, ProductLineModel
+from Products.models import ProductModel
 from Companies.models import CompanyModel
 from rest_framework import status
+
+class ProductLineSerializer(serializers.ModelSerializer):
+    product = serializers.PrimaryKeyRelatedField(queryset=ProductModel.objects.all())
+
+    class Meta:
+        model = ProductLineModel
+        fields = ['product', 'quantity']
 
 class OrderSerializer(serializers.ModelSerializer):
     items = ProductLineSerializer(many=True)

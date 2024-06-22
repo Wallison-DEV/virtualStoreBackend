@@ -6,10 +6,10 @@ SECRET_KEY = "django-insecure-+qjl)s3br)*i4r!b8r!uj6d-8js&&2dyg_z9ce+8oj^%yi2o%+
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
+    "http://localhost:3000",
 ]
 
 INSTALLED_APPS = [
@@ -34,6 +34,9 @@ INSTALLED_APPS = [
 ]
 
 AUTH_USER_MODEL = 'UsersAccounts.UserModel'
+
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/"
 
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',

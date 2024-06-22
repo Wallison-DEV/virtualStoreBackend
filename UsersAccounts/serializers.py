@@ -38,7 +38,7 @@ class CustomTokenObtainPairSerializer(serializers.Serializer):
     password = serializers.CharField()
 
     def validate(self, attrs):
-        username_or_email_or_registration = attrs.get('name_email_or_registration')
+        username_or_email_or_registration = attrs.get('username_or_email_or_registration')  
         password = attrs.get('password')
 
         user = authenticate(email=username_or_email_or_registration, password=password)
@@ -56,9 +56,13 @@ class CustomTokenObtainPairSerializer(serializers.Serializer):
 
         refresh = RefreshToken.for_user(user)
         access_token = refresh.access_token
+        
+        user_serializer = UserSerializer(user)
+        user_data = user_serializer.data
 
         return {
             'refresh': str(refresh),
             'access': str(access_token),
             'exp': access_token['exp'],
+            'user': user_data,
         }

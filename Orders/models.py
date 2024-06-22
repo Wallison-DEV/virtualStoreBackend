@@ -2,8 +2,19 @@ from django.db import models
 from Address.models import AddressModel
 from UsersAccounts.models import UserModel 
 from Companies.models import CompanyModel
-from Products.models import ProductModel, ProductLineModel
+from Products.models import ProductModel
 from Card.models import CardModel
+
+class ProductLineModel(models.Model):
+    product = models.ForeignKey(ProductModel, on_delete=models.DO_NOTHING, verbose_name='Produto')
+    quantity = models.PositiveIntegerField(verbose_name='Quantidade')
+
+    def __str__(self):
+        return f'{self.product} x{self.quantity}'
+
+    class Meta:
+        verbose_name = 'Item'
+        verbose_name_plural = 'Itens'
 
 class OrderModel(models.Model):
     PAYMENT_METHOD_CHOICES = [

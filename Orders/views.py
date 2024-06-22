@@ -1,9 +1,14 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
-from .models import OrderModel
-from .serializers import OrderSerializer
+from rest_framework.permissions import IsAuthenticated
+from .models import OrderModel, ProductLineModel
+from .serializers import OrderSerializer, ProductLineSerializer
 from Companies.models import CompanyModel
+
+class ProductLineViewSet(viewsets.ModelViewSet):
+    queryset = ProductLineModel.objects.all()
+    serializer_class = ProductLineSerializer
 
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = OrderModel.objects.all()
