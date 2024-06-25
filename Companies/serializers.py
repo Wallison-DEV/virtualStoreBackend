@@ -34,7 +34,7 @@ class CompanySerializer(serializers.ModelSerializer):
     class Meta:
         model = CompanyModel
         fields = [
-            'id', 'name', 'email', 'phone_number', 'address', 'registration_number',
+            'id', 'username', 'email', 'phone_number', 'address', 'password', 'registration_number',
             'created_at', 'updated_at', 'products', 'orders_as_seller'
         ]
 
@@ -46,9 +46,8 @@ class CompanySerializer(serializers.ModelSerializer):
         menu_data = CompanyProductLine.objects.filter(company=obj)
         menu_serializer = CompanyProductLineSerializer(menu_data, many=True)
         return menu_serializer.data
-    
+
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        representation['products'] = self.get_products(instance).order_by('created_at')
-        
+        representation['products'] = self.get_products(instance)
         return representation

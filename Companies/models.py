@@ -6,7 +6,7 @@ from UsersAccounts.models import UserModel
 from Products.models import ProductModel
 
 class CompanyModel(AbstractUser):
-    name = models.CharField(max_length=255, verbose_name="Nome da Empresa")
+    username = models.CharField(max_length=255, verbose_name="Nome da Empresa", unique=True)
     email = models.EmailField(max_length=255, verbose_name="Email da Empresa", unique=True)
     phone_number = models.CharField(max_length=15, verbose_name="Número de Telefone", null=True, blank=True)
     address = models.TextField(verbose_name="Endereço da Empresa")
@@ -14,8 +14,22 @@ class CompanyModel(AbstractUser):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Data de Criação")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Data de Atualização")
 
+    groups = models.ManyToManyField(
+        'auth.Group',
+        related_name='company_groups',  
+        blank=True,
+        help_text='The groups this company belongs to.',
+        verbose_name='groups',
+    )
+    user_permissions = models.ManyToManyField(
+        'auth.Permission',
+        related_name='company_permissions',  
+        blank=True,
+        help_text='Specific permissions for this company.',
+        verbose_name='user permissions',
+    )
     def __str__(self):
-        return self.name
+        return self.username
 
     class Meta:
         verbose_name = "Empresa"

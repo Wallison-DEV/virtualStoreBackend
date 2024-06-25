@@ -1,7 +1,7 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly, AllowAny
 from rest_framework.filters import OrderingFilter
 from .models import CompanyModel, CompanyProductLine, Rating
 from Products.models import ProductModel
@@ -14,7 +14,7 @@ class RatingViewSet(viewsets.ModelViewSet):
 class CompanyViewSet(viewsets.ModelViewSet):
     queryset = CompanyModel.objects.all()
     serializer_class = CompanySerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [AllowAny]
 
 class CompanyProductLineViewSet(viewsets.ModelViewSet):
     queryset = CompanyProductLine.objects.all()
