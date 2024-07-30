@@ -50,10 +50,8 @@ class CustomTokenObtainPairSerializer(serializers.Serializer):
 
         try:
             company = CompanyModel.objects.get(registration_number=username_or_email_or_registration)
-            if company.password == password:
+            if company.check_password(password):
                 return company
-            else:
-                pass
         except CompanyModel.DoesNotExist:
             pass
 
@@ -61,41 +59,37 @@ class CustomTokenObtainPairSerializer(serializers.Serializer):
 
     def get_tokens_for_user(self, user):
         if isinstance(user, UserModel):
-            refresh = RefreshToken.for_user(user)
-            access_token = str(refresh.access_token)
-
-            user_serializer = UserSerializer(user)
-            user_data = user_serializer.data
-
-            return {
-                'refresh': str(refresh),
-                'access': access_token,
-                'exp': refresh.payload['exp'],
-                'user': user_data,
-            }
+            return self.generate_refresh_token_for_user(user)
         elif isinstance(user, CompanyModel):
             return self.generate_refresh_token_for_company(user)
         else:
             raise serializers.ValidationError('Unexpected user type encountered during serialization')
 
-    def generate_refresh_token_for_company(self, company):
-
-        refresh = RefreshToken()
-        refresh['user_id'] = company.pk
-        refresh['username'] = company.username
-        refresh['email'] = company.email
-        refresh['registration_number'] = company.registration_number
-        refresh.set_exp(lifetime=timedelta(hours=1))  
-
+    def generate_refresh_token_for_user(self, user):
+        refresh = RefreshToken.for_user(user)
         access_token = str(refresh.access_token)
-        exp = refresh.payload['exp']
 
-        company_serializer = CompanySerializer(company)
-        user_data = company_serializer.data
+        user_serializer = UserSerializer(user)
+        user_data = user_serializer.data
 
         return {
             'refresh': str(refresh),
             'access': access_token,
-            'exp': exp,
+            'exp': refresh.payload['exp'],
             'user': user_data,
+        }
+
+    def generate_refresh_token_for_company(self, company):
+        refresh = RefreshToken()
+        refresh.access_token.lifetime = timedelta(minutes=5) 
+        token = str(refresh.access_token)
+        
+        company_serializer = CompanySerializer(company)
+        company_data = company_serializer.data
+
+        return {
+            'refresh': token,
+            'access': token,
+            'exp': refresh.payload['exp'],
+            'user': company_data,
         }
