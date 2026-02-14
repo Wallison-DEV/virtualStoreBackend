@@ -33,12 +33,7 @@ INSTALLED_APPS = [
     'Products',
 ]
 
-AUTH_USER_MODEL = 'UsersAccounts.UserModel'
 
-AUTHENTICATION_BACKENDS = [
-    'store.authentication_backends.CustomUserModelBackend',
-    'django.contrib.auth.backends.ModelBackend', 
-] 
 
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
