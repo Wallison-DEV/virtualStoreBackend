@@ -12,6 +12,7 @@ __pycache__/
 
 # Ignore database files
 db.sqlite3
+db.sqlite3-journal
 
 # Ignore environment and other config files
 env/
@@ -40,5 +41,4 @@ Thumbs.db
 .vscode/
 
 # Ignore Django migrations
-**/migrations/*.py
-**/migrations/*.pyc
+**/migrations/__pycache__/
