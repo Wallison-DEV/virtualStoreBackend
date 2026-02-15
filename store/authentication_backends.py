@@ -1,44 +1,32 @@
 from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth import get_user_model
-from Companies.models import CompanyModel
+from django.db import models # Import necessário para o Q()
 
 class CustomUserModelBackend(ModelBackend):
     def authenticate(self, request, username=None, password=None, **kwargs):
         UserModel = get_user_model()
 
-        try:
-            user = UserModel.objects.get(username=username)
-            if user.check_password(password):
-                return user
-        except UserModel.DoesNotExist:
-            pass
+        # Busca Usuário (Username ou Email)
+        user = UserModel.objects.filter(
+            models.Q(username=username) | models.Q(email=username)
+        ).first()
+        if user and user.check_password(password):
+            return user
 
+        # Busca Empresa (Username, Email ou Registro)
         try:
-            user = UserModel.objects.get(email=username)
-            if user.check_password(password):
-                return user
-        except UserModel.DoesNotExist:
-            pass
-
-        try:
-            company = CompanyModel.objects.get(username=username)
-            if company.password == password:
+            from Companies.models import CompanyModel
+            company = CompanyModel.objects.filter(
+                models.Q(username=username) | 
+                models.Q(email=username) | 
+                models.Q(registration_number=username)
+            ).first()
+            
+            # Nota: se suas empresas ainda usam texto puro, mantenha o == 
+            # Mas o padrão AbstractUser do seu model exige check_password
+            if company and company.check_password(password):
                 return company
-        except CompanyModel.DoesNotExist:
-            pass
-        
-        try:
-            company = CompanyModel.objects.get(registration_number=username)
-            if company.password == password:
-                return company
-        except CompanyModel.DoesNotExist:
-            pass
-        
-        try:
-            company = CompanyModel.objects.get(email=username)
-            if company.password == password:
-                return company
-        except CompanyModel.DoesNotExist:
+        except Exception:
             pass
 
         return None
@@ -49,6 +37,7 @@ class CustomUserModelBackend(ModelBackend):
             return UserModel.objects.get(pk=user_id)
         except UserModel.DoesNotExist:
             try:
+                from Companies.models import CompanyModel
                 return CompanyModel.objects.get(pk=user_id)
-            except CompanyModel.DoesNotExist:
+            except:
                 return None

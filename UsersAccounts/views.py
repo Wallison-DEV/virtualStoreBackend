@@ -1,22 +1,18 @@
 from rest_framework.views import APIView
-from rest_framework import viewsets, status
+from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import action
-from .models import UserModel
-from .serializers import UserSerializer
-from Card.serializers import CardSerializer
-from Address.serializers import AddressSerializer
-from Address.models import AddressModel
-from Card.models import CardModel
-from Companies.models import CompanyModel
-from Companies.serializers import CompanySerializer
-
 from rest_framework_simplejwt.views import TokenViewBase
 from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import UntypedToken
 from rest_framework.permissions import AllowAny
+
 from .serializers import CustomTokenObtainPairSerializer
+from .models import UserModel
+from .serializers import UserSerializer
+from Companies.models import CompanyModel
+
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = UserModel.objects.all()
@@ -34,31 +30,30 @@ class TokenValidateView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        token = request.headers.get('Authorization', '').split(' ')[1]
+        auth_header = request.headers.get('Authorization', '')
+        if not auth_header:
+            return Response({'error': 'No token provided'}, status=400)
+            
+        token = auth_header.split(' ')[1]
 
         try:
-            untyped_token = UntypedToken(token)
+            decoded_token = UntypedToken(token)
+            user_id = decoded_token.payload.get('user_id')
+            is_company = decoded_token.payload.get('is_company', False)
 
-            if 'user_id' in untyped_token.payload:
-                user_id = untyped_token.payload['user_id']
-                try:
-                    user = UserModel.objects.get(id=user_id)
-                    serializer = UserSerializer(user)
-                    return Response(serializer.data, status=status.HTTP_200_OK)
-                except UserModel.DoesNotExist:
-                    return Response({'error': 'Usuário não encontrado'}, status=status.HTTP_404_NOT_FOUND)
-
-            elif 'company_id' in untyped_token.payload:
-                company_id = untyped_token.payload['company_id']
-                try:
-                    company = CompanyModel.objects.get(id=company_id)
-                    serializer = CompanySerializer(company)
-                    return Response(serializer.data, status=status.HTTP_200_OK)
-                except CompanyModel.DoesNotExist:
-                    return Response({'error': 'Empresa não encontrada'}, status=status.HTTP_404_NOT_FOUND)
-
+            if is_company:
+                account = CompanyModel.objects.filter(id=user_id).first()
+                from Companies.serializers import CompanySerializer
+                serializer = CompanySerializer(account)
             else:
-                return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
+                account = UserModel.objects.filter(id=user_id).first()
+                from .serializers import UserSerializer
+                serializer = UserSerializer(account)
 
-        except TokenError as e:
-            return Response({'error': 'Token inválido', 'details': str(e)}, status=status.HTTP_401_UNAUTHORIZED)
+            if not account:
+                return Response({'error': 'Account not found'}, status=404)
+
+            return Response(serializer.data, status=200)
+
+        except TokenError:
+            return Response({'error': 'Invalid or expired token'}, status=401)

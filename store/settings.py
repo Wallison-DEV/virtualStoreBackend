@@ -24,16 +24,22 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
+    'django_filters',
     
-    'UsersAccounts',
     'Address',
     'Card',
+    'Products',
+    'UsersAccounts',
     'Companies',
     'Orders',
-    'Products',
 ]
 
+AUTH_USER_MODEL = 'UsersAccounts.UserModel'
 
+AUTHENTICATION_BACKENDS = [
+    'store.authentication_backends.CustomUserModelBackend',
+    'django.contrib.auth.backends.ModelBackend', 
+] 
 
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
@@ -48,6 +54,9 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend'
     ],
 }
 
@@ -111,6 +120,17 @@ TIME_ZONE = "America/Sao_Paulo"
 USE_I18N = True
 
 USE_TZ = True
+
+from datetime import timedelta
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7), 
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 STATIC_URL = "static/"
 

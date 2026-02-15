@@ -6,12 +6,9 @@ from UsersAccounts.models import UserModel
 from Products.models import ProductModel
 
 class CompanyModel(AbstractUser):
-    username = models.CharField(max_length=255, verbose_name="Nome da Empresa", unique=True)
-    email = models.EmailField(max_length=255, verbose_name="Email da Empresa", unique=True)
     phone_number = models.CharField(max_length=15, verbose_name="Número de Telefone", null=True, blank=True)
     address = models.TextField(verbose_name="Endereço da Empresa")
     registration_number = models.CharField(max_length=50, verbose_name="Número de Registro", unique=True)
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Data de Criação")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Data de Atualização")
 
     groups = models.ManyToManyField(
