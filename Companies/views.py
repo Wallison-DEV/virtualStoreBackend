@@ -10,38 +10,38 @@ from .serializers import CompanySerializer, CompanyProductLineSerializer, Rating
 class RatingViewSet(viewsets.ModelViewSet):
     queryset = Rating.objects.all()
     serializer_class = RatingSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
 class CompanyViewSet(viewsets.ModelViewSet):
-    queryset = CompanyModel.objects.all()
+    def get_queryset(self):
+        return CompanyModel.objects.prefetch_related(
+        'product_lines__product', 
+        'product_lines__product_line_ratings'
+    )
+
     serializer_class = CompanySerializer
     permission_classes = [AllowAny]
 
 class CompanyProductLineViewSet(viewsets.ModelViewSet):
-    queryset = CompanyProductLine.objects.all()
     serializer_class = CompanyProductLineSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
+    filter_backends = [OrderingFilter]
+    ordering_fields = ['quantity', 'product__name']
 
-    def list(self, request, *args, **kwargs):
-        filters = request.data.get('filters', {})
-        category_query = filters.get('category', '')
-        content_query = filters.get('content', '')
-        order_query = filters.get('order_by', '')
+    def get_queryset(self):
+        params = self.request.query_params
+        category = params.get('category')
+        content = params.get('content')
 
-        filtered_products = CompanyProductLine.objects.all()
-
-        if category_query:
-            filtered_products = filtered_products.filter(product__category=category_query)
+        queryset = CompanyProductLine.objects.select_related('product').all()
+    
+        if category:
+            queryset = queryset.filter(product__category=category)
         
-        if content_query:
-            filtered_products = filtered_products.filter(product__name__icontains=content_query)
-        
-        if order_query:
-            filtered_products = filtered_products.order_by(order_query)
+        if content:
+            queryset = queryset.filter(product__name__icontains=content)
 
-        page = self.paginate_queryset(filtered_products)
-        if page is not None:
-            serializer = self.get_paginated_response(self.get_serializer(page, many=True).data)
-        else:
-            serializer = self.get_serializer(filtered_products, many=True)
-
-        return Response(serializer.data)
+        return queryset
